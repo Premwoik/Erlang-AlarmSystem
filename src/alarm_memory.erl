@@ -18,16 +18,14 @@
 -record(output, {id::integer(), state=low, name::string()}).
 -record(mem, {outputs = [], remotes = [], zones = []}).
 
-%%%%%%%%%%%%%%
+%%====================================================================
 %% API
-%%%%%%%%%%%%%%
+%%====================================================================
 
 init(_Args) ->
   {ok, #mem{}}.
 
-%%%%%%%%%%%%%
-%% get_zone
-%%%%%%%%%%%%%
+
 handle_call({get_zone, Which}, _From, State) ->
   case Which of
     all->
@@ -38,25 +36,19 @@ handle_call({get_zone, Which}, _From, State) ->
         State#mem.zones)}
   end;
 
-%%%%%%%%%%%%%
-%% get output
-%%%%%%%%%%%%%
 handle_call({get_output, Which}, _From, State) ->
   case Which of
       all-> {reply, State#mem.outputs, State};
       _Else -> {reply, lists:filter(
-                        fun(Output) -> Output#output.id == Which or Output#output.name == Which end,
+                        fun(Output) -> (Output#output.id == Which) or Output#output.name == Which end,
                         State#mem.outputs)}
 end;
 
-%%%%%%%%%%%%%
-%% get remote
-%%%%%%%%%%%%%
 handle_call({get_remote, Which}, _From, State) ->
   case Which of
       all-> {reply, State#mem.remotes, State};
       _Else -> {reply, lists:filter(
-                        fun(Remote) -> Remote#output.id == Which or Remote#output.name == Which end,
+                        fun(Remote) -> (Remote#output.id == Which) or Remote#output.name == Which end,
                         State#mem.remotes)}
 end.
 
@@ -64,9 +56,9 @@ end.
 handle_cast(Request, State) ->
   erlang:error(not_implemented).
 
-%%%%%%%%%%%%%%%%%%%%%%%%
-%% EXTERNAL API
-%%%%%%%%%%%%%%%%%%%%%%%%
+%%====================================================================
+%% External API
+%%====================================================================
 
 get_output() -> 1.
 
@@ -88,6 +80,6 @@ is_inputs_zone_active(Id, Server) ->
   Zones = gen_server:call(Server, {get_zone, Id}),
   lists:any(fun(Zone) -> Zone#zone.is_active == true end, Zones).
 
-%%%%%%%%%%%%%%%%%%%%%%%%
-%% INTERNAL FUNCTIONS
-%%%%%%%%%%%%%%%%%%%%%%%%
+%%====================================================================
+%% Internal functions
+%%====================================================================
