@@ -28,7 +28,7 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-  SupFlags = #{strategy => one_for_one, intensity => 1, period => 5},
+  SupFlags = #{strategy => one_for_one, intensity => 1, period => 60},
   Core = #{id => alarm_core,
     start => {alarm_core, start, []},
     restart => permanent,
@@ -41,8 +41,13 @@ init([]) ->
     shutdown => brutal_kill,
     type => worker,
     modules => [alarm_inputs]},
-
-  ChildSpecs = [Core, Inputs],
+  Sockets = #{id => alarm_socket,
+      start => {alarm_socket, start_link, []},
+      restart => permanent,
+      shutdown => brutal_kill,
+      type => worker,
+      modules => [alarm_socket, alarm_core]},
+  ChildSpecs = [Sockets, Inputs, Core],
   {ok, {SupFlags, ChildSpecs}}.
 
 %%====================================================================

@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 26. Dec 2017 20:55
 %%%-------------------------------------------------------------------
--module(manipulator).
+-module(alarm_socket_handler).
 -author("prw").
 -behaviour(gen_event).
 
@@ -25,6 +25,9 @@ handle_event(Event, State) ->
 
 handle_call(Request, State) ->
   erlang:error(not_implemented).
+
+
+
 
 
 send_code(Code) -> io:format("Response: ~p\n", [handle_code(Code)]).

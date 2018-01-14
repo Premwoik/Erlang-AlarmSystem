@@ -62,7 +62,7 @@ active_sensor(Number) ->
 
 get_sensors() -> gen_server:call(?MODULE, {get_sensors}).
 
-start() -> gen_server:start({local, ?MODULE}, ?MODULE, {10}, []).
+start() -> gen_server:start_link({local, ?MODULE}, ?MODULE, {10}, []).
 
 stop() -> gen_server:stop(?MODULE).
 

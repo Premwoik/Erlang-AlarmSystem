@@ -115,7 +115,7 @@ watch({call, From}, {deactive_zone, Zones}, Data) ->
       {next_state, idle, update_active_zones(NewActiveZones, Data), [{reply, From, zones_deactivated}]};
 
     X when X < length(Data#mem.active_zones) ->
-      {keep_state, update_active_zones(NewActiveZones, Data), [{reply, From, {still_active, NewActiveZones}}]};
+      {keep_state, update_active_zones(NewActiveZones, Data), [{reply, From, still_active}]};
 
     _Else -> {_, _, NewData, State} = idle({call, From}, {active_zone, Zones}, Data), {keep_state, NewData, State}
   end;
