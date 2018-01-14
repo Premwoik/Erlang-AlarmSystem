@@ -16,7 +16,7 @@
 -export([init/1, handle_call/3, handle_cast/2, start/0, stop/0]).
 
 %%motion
--export([motion_sensor/0, get_sensors/0, get_module/0, spawn_sensors/2, sabotage_sensor/1, repair_sensor/1, active_sensor/1]).
+-export([motion_sensor/0, get_sensors/0, get_module/0, spawn_sensors/2, sabotage_sensor/1, active_sensor/1]).
 
 
 init({Number}) ->
@@ -52,8 +52,8 @@ sabotage_sensor(Number) ->
   Pid = get_sensor_by_number(Number, Data),
   exit(Pid, error).
 
-repair_sensor(Number) ->
-  erlang:error('nie wiem jak to zrobić XDDDD').
+%%repair_sensor(Number) ->
+%%  erlang:error('nie wiem jak to zrobić XDDDD').
 
 active_sensor(Number) ->
   Data = get_sensors(),
