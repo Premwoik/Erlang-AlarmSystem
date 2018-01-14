@@ -21,14 +21,14 @@
 -export([idle/3, watch/3, alarm_on/3]).
 
 %%
--export([active_input/1, handle_code/1, turn_off_alarm/0, active_zone/1, check_state/0, handle_code2/1]).
+-export([active_input/1, handle_code/1, turn_off_alarm/0, active_zone/1, check_state/0, handle_code2/1, sabotage_input/1]).
 
 -record(zone, {name, inputs = []}).
 -record(code, {num, state, type, other}).
 -record(mem, {zones = [], active_zones = [], codes = []}).
 
-init(Args) ->
-  {ok, idle, Args}.
+init(_Args) ->
+  {ok, idle, read_memory()}.
 
 callback_mode() -> state_functions.
 
@@ -37,11 +37,13 @@ callback_mode() -> state_functions.
 %%%===================================================================
 
 
-start() -> gen_statem:start_link({local, ?MODULE}, ?MODULE, read_memory(), []).
+start() -> gen_statem:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 stop() -> gen_statem:stop(?MODULE).
 
 active_input(Number) -> gen_statem:cast(?MODULE, {active_input, Number}).
+
+sabotage_input(Number) -> gen_statem:cast(?MODULE, {sabotage_input, Number}).
 
 turn_off_alarm() -> gen_statem:call(?MODULE, turn_off).
 
@@ -126,8 +128,12 @@ watch(EventType, EventContent, Data) ->
 handle_event({call, From}, get_codes, Data) ->
   {keep_state, Data, [{reply, From, Data#mem.codes}]};
 
+handle_event(cast, {sabotage_input, Num}, Data) ->
+  io:format("alarm_core:sabotage_event: ~p\n", [Num]),
+  {next_state, alarm_on, Data};
+
 handle_event(_, _, Data) ->
-  {keep_state, Data}.
+  {keep_state,  Data}.
 
 
 %%%===================================================================

@@ -12,7 +12,7 @@
 %%%===================================================================
 %%% API
 %%%===================================================================
--export([read_memory/0, save_memory/0]).
+-export([read_memory/0, save_memory/0, read_file_to_string/0]).
 
 
 read_memory() ->
@@ -29,5 +29,5 @@ save_memory() ->
 %%%===================================================================
 
 read_file_to_string() ->
-  {ok, File} = file:read_file("memory"),
+  {ok, File} = file:read_file("/home/prw/IdeaProjects/alarmsys/_build/default/lib/alarmsys/src/memory"),
   unicode:characters_to_list(File).

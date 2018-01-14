@@ -14,7 +14,7 @@
 %%% API
 %%%===================================================================
 -import(alarm_core, [handle_code/1]).
--export([start/0, init/1, handle_event/2, handle_call/2]).
+-export([start/0, init/1, handle_event/2, handle_call/2, start_link2/0]).
 
 
 init(InitArgs) ->
@@ -28,6 +28,8 @@ handle_call(Request, State) ->
 
 
 send_code(Code) -> io:format("Response: ~p\n", [handle_code(Code)]).
+
+start_link2() -> spawn_link(?MODULE, start, []).
 
 start() ->
   case io:fread("Gimme code:", "~d") of

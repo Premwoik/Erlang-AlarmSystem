@@ -20,7 +20,7 @@
 %%====================================================================
 
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+  supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 %%====================================================================
 %% Supervisor callbacks
@@ -28,7 +28,22 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    {ok, { {one_for_all, 0, 1}, []} }.
+  SupFlags = #{strategy => one_for_one, intensity => 1, period => 5},
+  Core = #{id => alarm_core,
+    start => {alarm_core, start, []},
+    restart => permanent,
+    shutdown => brutal_kill,
+    type => worker,
+    modules => [alarm_core, alarm_file]},
+  Inputs = #{id => alarm_inputs,
+    start => {alarm_inputs, start, []},
+    restart => permanent,
+    shutdown => brutal_kill,
+    type => worker,
+    modules => [alarm_inputs]},
+
+  ChildSpecs = [Core, Inputs],
+  {ok, {SupFlags, ChildSpecs}}.
 
 %%====================================================================
 %% Internal functions
