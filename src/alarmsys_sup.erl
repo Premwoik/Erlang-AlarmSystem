@@ -20,7 +20,11 @@
 %%====================================================================
 
 start_link() ->
-  supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+  {ok, Pid} = supervisor:start_link({local, ?SERVER}, ?MODULE, []),
+  ok = gen_event:add_handler(events, alarm_socket, {8091, []}),
+  ok = gen_event:add_handler(events, alarm_history, []),
+  ok = gen_event:add_handler(events, alarm_screen_writer, []),
+  {ok, Pid}.
 
 %%====================================================================
 %% Supervisor callbacks
@@ -46,8 +50,11 @@ init([]) ->
       restart => permanent,
       shutdown => brutal_kill,
       type => worker,
-      modules => [alarm_socket, alarm_core]},
-  ChildSpecs = [Sockets, Inputs, Core],
+      modules => [alarm_socket, alarm_core, alarm_history_handler]},
+  Event =  {my_event, {gen_event, start_link, [{local, events}]},
+    permanent, 5000, worker, [alarm_socket, alarm_core, alarm_history_handler]},
+
+  ChildSpecs = [Inputs, Core, Event],
   {ok, {SupFlags, ChildSpecs}}.
 
 %%====================================================================

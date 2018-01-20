@@ -1,10 +1,25 @@
 import socket
 import threading
 import time
+import erlastic
+
 
 def loop(soc: socket.socket):
     while True:
-        print(str(soc.recv(1024), 'utf-8'))
+        rec = soc.recv(1024)
+        if len(rec) == 0:
+            break
+        display(rec)
+
+
+def display(rec):
+    try:
+        print(str(rec, 'utf-8'))
+    except :
+        try:
+            print(erlastic.decode(rec))
+        except:
+            print(rec)
 
 
 if __name__ == "__main__":
@@ -12,6 +27,8 @@ if __name__ == "__main__":
     s.connect(('localhost', 8091))
     threading.Thread(target=loop, args=[s]).start()
     while True:
-        s.send(str.encode(input('>')))
-        time.sleep(0.1)
-
+        in_ = input('>')
+        s.send(str.encode(in_))
+        if in_ == 'quit':
+            break
+        time.sleep(0.5)

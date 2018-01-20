@@ -1,23 +1,25 @@
 %%%-------------------------------------------------------------------
 %%% @author prw
-%%% @copyright (C) 2017, <COMPANY>
+%%% @copyright (C) 2018, <COMPANY>
 %%% @doc
 %%%
 %%% @end
-%%% Created : 26. Dec 2017 20:53
+%%% Created : 20. Jan 2018 14:43
 %%%-------------------------------------------------------------------
--module(alarm_commo_security).
+-module(alarm_history).
 -author("prw").
 -behaviour(gen_event).
 %% API
 -export([init/1, handle_event/2, handle_call/2]).
 
 
-init(InitArgs) ->
-  erlang:error(not_implemented).
 
-handle_event(Event, State) ->
-  erlang:error(not_implemented).
+init(_InitArgs) ->
+  {ok, []}.
 
-handle_call(Request, State) ->
-  erlang:error(not_implemented).
+handle_event(_Msg, State) ->
+  {ok, State}.
+
+handle_call(_Msg, State) ->
+  {ok,ok, State}.
+
