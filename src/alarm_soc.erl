@@ -139,7 +139,7 @@ handle_info({tcp, Socket, Msg}, State) ->
     "restart" -> ok = alarmsys_sup:restart_inputs(), send(Socket, "~p", [inputs_restarted]),{noreply, State};
     Otherwise -> case convert_to_code(Otherwise) of
                    {ok, Code}-> send(Socket, "~p", [alarm_core:handle_code(Code)]), {noreply, State};
-                   {error, _}-> {noreply, State}
+                   {error, _}-> send(Socket, "wrong code", []), {noreply, State}
                  end
   end;
 handle_info(E, State) ->

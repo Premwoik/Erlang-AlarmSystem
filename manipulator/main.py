@@ -1,7 +1,6 @@
 import socket
 import threading
 import time
-import erlastic
 
 
 def loop(soc: socket.socket):
@@ -16,10 +15,7 @@ def display(rec):
     try:
         print(str(rec, 'utf-8'))
     except :
-        try:
-            print(erlastic.decode(rec))
-        except:
-            print(rec)
+        print(rec)
 
 
 if __name__ == "__main__":

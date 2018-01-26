@@ -7,7 +7,7 @@
     [
         {code,123,idle,activate_zone,[z1,z2]},
         {code,123,watch,deactivate_zone,[z1,z2]},
-        {code,13,idle,active_zone,[z3]},
+        {code,13,idle,activate_zone,[z3]},
         {code,13,watch,deactivate_zone,[z3]},
         {code,321,alarm_on,turn_off,none}
      ]

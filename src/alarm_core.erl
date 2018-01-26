@@ -23,7 +23,7 @@
 -export([active_input/1, handle_code/1, turn_off_alarm/0, active_zone/1, check_state/0, sabotage_input/1]).
 
 -record(zone, {name, inputs = []}).
--record(code, {num, state, type, other}).
+-record(code, {num, state, type, params}).
 -record(mem, {zones = [], active_zones = [], codes = []}).
 
 init(Memory) ->
@@ -149,7 +149,7 @@ get_action_for_state(Type, Code, State, Data) ->
       (C#code.num =:= Code) and (C#code.state =:= State)
     end, Data#mem.codes),
   case length(Actions) > 0 of
-    true -> Action = hd(Actions), {Action#code.type, Action#code.other};
+    true -> Action = hd(Actions), {Action#code.type, Action#code.params};
     false -> throw(build_response(Type, wrong_code))
   end.
 
