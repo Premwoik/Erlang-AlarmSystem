@@ -13,13 +13,41 @@
 %%%===================================================================
 %%% API
 %%%===================================================================
--export([init/1, handle_call/3, handle_cast/2, start/0, stop/0]).
+-export([init/1, handle_call/3, handle_cast/2, stop/0, start_link/1]).
 
 %%motion
 -export([motion_sensor/0, get_sensors/0, get_module/0, spawn_sensors/2, sabotage_sensor/1, active_sensor/1]).
 
 
-init({Number}) ->
+sabotage_sensor(Number) ->
+  Data = get_sensors(),
+  Pid = get_sensor_by_number(Number, Data),
+  exit(Pid, error).
+
+
+active_sensor(Number) ->
+  Data = get_sensors(),
+  Pid = get_sensor_by_number(Number, Data),
+  erlang:send(Pid, move),
+  ok.
+
+
+get_sensors() -> gen_server:call(?MODULE, {get_sensors}).
+
+
+start_link(Inputs) -> gen_server:start_link({local, ?MODULE}, ?MODULE, Inputs, []).
+
+
+stop() -> gen_server:stop(?MODULE).
+
+
+get_module() -> ?MODULE.
+
+%%%===================================================================
+%%% gen_server callbacks
+%%%===================================================================
+
+init(Number) ->
   spawn_link(?MODULE, spawn_sensors, [self(), Number]),
   receive
     Sensors -> {ok, Sensors}
@@ -41,33 +69,9 @@ handle_cast({move_detected, Pid}, State) ->
   alarm_core:active_input(Number),
   {noreply, State}.
 
-%%%===================================================================
-%%% External functions
-%%%===================================================================
-
-sabotage_sensor(Number) ->
-  Data = get_sensors(),
-  Pid = get_sensor_by_number(Number, Data),
-  exit(Pid, error).
 
 
-active_sensor(Number) ->
-  Data = get_sensors(),
-  Pid = get_sensor_by_number(Number, Data),
-  erlang:send(Pid, move),
-  ok.
 
-
-get_sensors() -> gen_server:call(?MODULE, {get_sensors}).
-
-
-start() -> gen_server:start_link({local, ?MODULE}, ?MODULE, {10}, []).
-
-
-stop() -> gen_server:stop(?MODULE).
-
-
-get_module() -> ?MODULE.
 
 
 %%%===================================================================
@@ -85,19 +89,17 @@ get_sensor_by_number(Number, [_ | T]) -> get_sensor_by_number(Number - 1, T).
 sensors_monitor() ->
   receive
     ok -> ok;
-    {'DOWN', _, _, Pid, error} -> io:write(killed), gen_server:cast(?MODULE, {sabotage, Pid}), sensors_monitor()
+    {'DOWN', _, _, Pid, error} -> gen_server:cast(?MODULE, {sabotage, Pid}), sensors_monitor()
   end.
 
 
 spawn_sensors(Pid, Number) ->
-  Pid ! spawn_sensor(Number), sensors_monitor().
+  Pid ! [spawn_sensor() || _ <- lists:seq(1,Number)], sensors_monitor().
 
 
-spawn_sensor(0) -> [];
-
-spawn_sensor(Number) ->
+spawn_sensor() ->
   {Pid, _} = spawn_monitor(?MODULE, motion_sensor, []),
-  [Pid] ++ spawn_sensor(Number - 1).
+  Pid.
 
 %%SENSOR
 motion_sensor() ->

@@ -8,11 +8,12 @@
 -behaviour(supervisor).
 
 %% API
--export([start_link/0]).
+-export([start_link/0, restart_inputs/0]).
 
 %% Supervisor callbacks
 -export([init/1]).
 
+-include("alarm_config.hrl").
 -define(SERVER, ?MODULE).
 
 %%====================================================================
@@ -20,43 +21,62 @@
 %%====================================================================
 
 start_link() ->
-  {ok, Pid} = supervisor:start_link({local, ?SERVER}, ?MODULE, []),
-  ok = gen_event:add_handler(events, alarm_socket, {8091, []}),
-  ok = gen_event:add_handler(events, alarm_history, []),
-  ok = gen_event:add_handler(events, alarm_screen_writer, []),
+  {ok, Pid} = supervisor:start_link({local, ?SERVER}, ?MODULE, read_memory()),
+  ok = gen_event:add_handler(?MANAGER, alarm_soc_handler, []),
+  ok = gen_event:add_handler(?MANAGER, alarm_history, [?LOGS]),
+  ok = gen_event:add_handler(?MANAGER, alarm_screen_writer, []),
   {ok, Pid}.
+
+restart_inputs()->
+  ok = supervisor:terminate_child(?SERVER, alarm_inputs),
+  {ok,_} = supervisor:restart_child(?SERVER, alarm_inputs),
+  ok.
 
 %%====================================================================
 %% Supervisor callbacks
 %%====================================================================
 
-%% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
-init([]) ->
+init(Memory) ->
   SupFlags = #{strategy => one_for_one, intensity => 1, period => 60},
   Core = #{id => alarm_core,
-    start => {alarm_core, start, []},
+    start => {alarm_core, start_link, [Memory]},
     restart => permanent,
     shutdown => brutal_kill,
     type => worker,
     modules => [alarm_core, alarm_file]},
   Inputs = #{id => alarm_inputs,
-    start => {alarm_inputs, start, []},
+    start => {alarm_inputs, start_link, [?SENSOR_NUM]},
     restart => permanent,
     shutdown => brutal_kill,
     type => worker,
     modules => [alarm_inputs]},
-  Sockets = #{id => alarm_socket,
-      start => {alarm_socket, start_link, []},
-      restart => permanent,
-      shutdown => brutal_kill,
-      type => worker,
-      modules => [alarm_socket, alarm_core, alarm_history_handler]},
-  Event =  {my_event, {gen_event, start_link, [{local, events}]},
-    permanent, 5000, worker, [alarm_socket, alarm_core, alarm_history_handler]},
 
-  ChildSpecs = [Inputs, Core, Event],
+  SocketsSup = #{id => socket_sup,
+    start => {alarm_soc_sup, start_link, []},
+    restart => permanent,
+    shutdown => brutal_kill,
+    type => supervisor,
+    modules => [alarm_soc_sup]},
+  Event =  {my_event, {gen_event, start_link, [{local, ?MANAGER}]},
+    permanent, 5000, worker, [alarm_soc_handler, alarm_core, alarm_history_handler]},
+
+  ChildSpecs = [Inputs, Core, Event, SocketsSup],
   {ok, {SupFlags, ChildSpecs}}.
 
 %%====================================================================
 %% Internal functions
 %%====================================================================
+
+get_inputs({mem, Zones, _, _}) -> lists:usort(lists:flatten([Inputs || {zone, _, Inputs} <- Zones])).
+
+
+read_memory() ->
+  {ok, Tokens, _EndLine} = erl_scan:string(read_file_to_string()),
+  {ok, AbsForm} = erl_parse:parse_exprs(Tokens),
+  {value, Value, _Bs} = erl_eval:exprs(AbsForm, erl_eval:new_bindings()),
+  Value.
+
+read_file_to_string() ->
+  {ok, Path} = file:get_cwd(),
+  {ok, File} = file:read_file(Path ++ "/src/memory"),
+  unicode:characters_to_list(File).
