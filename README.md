@@ -1,6 +1,6 @@
 
 
-An OTP application - Alarm System simulation. ![alt text](https://travis-ci.com/Premwoik/Erlang-AlarmSystem.svg?token=6NPxvdxVXjtv553szhtp&branch=develop)
+An OTP application - Alarm System simulation. ![alt text](https://travis-ci.com/Premwoik/Erlang-AlarmSystem.svg?token=6NPxvdxVXjtv553szhtp&branch=master)
 =====
 
 An OTP application which simulate Alarm System. Created by Daniel Stefanik and Przemysław Wojtasik.
