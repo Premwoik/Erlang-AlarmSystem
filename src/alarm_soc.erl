@@ -122,14 +122,14 @@ handle_info({tcp, Socket, Msg}, State) ->
   try
     case Msg of
 
-      "sabotage " ++ Sensor->
+      "sabotage " ++ Sensor ->
         io:format("~p", [Sensor]),
         io:write(is_integer(Sensor)),
         Result = alarm_inputs:sabotage_sensor(list_to_integer(Sensor)),
         send(Socket, "~p", [Result]),
         {noreply, State};
 
-      "activate " ++ Sensor->
+      "activate " ++ Sensor ->
         Result = alarm_inputs:activate_sensor(list_to_integer(Sensor)),
         send(Socket, "~p", [Result]),
         {noreply, State};
@@ -139,10 +139,11 @@ handle_info({tcp, Socket, Msg}, State) ->
         send(Socket, "~p", [inputs_restarted]),
         {noreply, State};
 
-      Code -> {CodeInt, _} = string:to_integer(Code),io:format("CODE ~p", [CodeInt]),  send(Socket, "~p", [alarm_core:handle_code(CodeInt)]), {noreply, State}
+      Code -> {CodeInt, _} = string:to_integer(Code), io:format("CODE ~p", [CodeInt]),
+        send(Socket, "~p", [alarm_core:handle_code(CodeInt)]), {noreply, State}
     end
   catch
-      _:_  -> send(Socket, "wrong code", []), {noreply, State}
+    _:_ -> send(Socket, "wrong code", []), {noreply, State}
   end;
 
 handle_info({tcp_closed, Socket}, State) ->
