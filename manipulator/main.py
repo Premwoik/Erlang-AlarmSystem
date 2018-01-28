@@ -27,7 +27,7 @@ if __name__ == "__main__":
     s.connect(('localhost', 8091))
     threading.Thread(target=loop, args=[s]).start()
     while True:
-        time.sleep(0.5)
+        time.sleep(0.2)
         in_ = input('>')
         s.send(str.encode(in_))
         if in_ == 'quit':
