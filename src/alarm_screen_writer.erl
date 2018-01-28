@@ -39,9 +39,9 @@ make_string(Data) ->
   lists:flatten(get_date() ++ " LOG " ++ parse_to_string(Data) ++ "\n").
 
 parse_to_string(Data) ->
-  lists:flatten(io_lib:format("~p",[Data])).
+  lists:flatten(io_lib:format("~p", [Data])).
 
 
-get_date()->
+get_date() ->
   {{Year, Month, Day}, {Hour, Min, Sec}} = calendar:local_time(),
   io_lib:format("~p-~p-~p ~p:~p:~p", [Year, Month, Day, Hour, Min, Sec]).

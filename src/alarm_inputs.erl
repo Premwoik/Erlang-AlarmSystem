@@ -90,7 +90,7 @@ sensors_monitor() ->
 
 
 spawn_sensors(Pid, Number) ->
-  Pid ! [spawn_sensor() || _ <- lists:seq(1,Number)], sensors_monitor().
+  Pid ! [spawn_sensor() || _ <- lists:seq(1, Number)], sensors_monitor().
 
 
 spawn_sensor() ->

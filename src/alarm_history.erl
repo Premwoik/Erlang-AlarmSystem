@@ -30,7 +30,7 @@ handle_event(Msg, State = #state{file = File}) ->
 
 handle_call(Msg, State = #state{file = File}) ->
   save_to_file(Msg, File),
-  {ok,ok, State}.
+  {ok, ok, State}.
 
 %%%===================================================================
 %%% Internal functions
@@ -47,8 +47,8 @@ save_to_file(Msg, File) ->
 make_string(Msg) ->
   lists:flatten(get_date() ++ " :: " ++ parse_to_string(Msg)).
 
-get_date()->
+get_date() ->
   io_lib:format("~p", [calendar:local_time()]).
 
 parse_to_string(Msg) ->
-  lists:flatten(io_lib:format("~p",[Msg])) ++ "\n".
+  lists:flatten(io_lib:format("~p", [Msg])) ++ "\n".

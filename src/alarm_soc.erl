@@ -35,7 +35,7 @@
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec(start_link(Socket:: port()) ->
+-spec(start_link(Socket :: port()) ->
   {ok, Pid :: pid()} | ignore | {error, Reason :: term()}).
 
 start_link(Socket) ->
@@ -49,7 +49,7 @@ start_link(Socket) ->
 init(Socket) ->
 %%  process_flag(trap_exit, true),
   gen_server:cast(self(), accept),
-  {ok, #state{socket = Socket, type=listener}}.
+  {ok, #state{socket = Socket, type = listener}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -82,12 +82,12 @@ handle_call(_Request, _From, State) ->
   {noreply, NewState :: #state{}, timeout() | hibernate} |
   {stop, Reason :: term(), NewState :: #state{}}).
 
-handle_cast(accept, State = #state{socket=ListenSocket}) ->
+handle_cast(accept, State = #state{socket = ListenSocket}) ->
   {ok, AcceptSocket} = gen_tcp:accept(ListenSocket),
   alarm_soc_sup:start_socket(),
   alarm_soc_handler:add_socket(self()),
   send(AcceptSocket, "Hello", []),
-  {noreply, State#state{socket=AcceptSocket, type = connected}};
+  {noreply, State#state{socket = AcceptSocket, type = connected}};
 
 handle_cast({send, Msg}, State) ->
   send(State#state.socket, "~p", [Msg]),
@@ -113,28 +113,28 @@ handle_cast(Msg, State) ->
   {noreply, NewState :: #state{}, timeout() | hibernate} |
   {stop, Reason :: term(), NewState :: #state{}}).
 
-handle_info({tcp, Socket, "quit"++_}, State) ->
+handle_info({tcp, Socket, "quit" ++ _}, State) ->
   gen_tcp:close(Socket),
   alarm_soc_handler:remove_socket(Socket),
-{stop, normal, State};
+  {stop, normal, State};
 
 handle_info({tcp, Socket, Msg}, State) ->
   case Msg of
     "sabotage " ++ Sensor -> alarm_inputs:sabotage_sensor(list_to_integer(Sensor)), {noreply, State};
     "activate " ++ Sensor -> alarm_inputs:activate_sensor(list_to_integer(Sensor)), {noreply, State};
-    "restart" -> ok = alarmsys_sup:restart_inputs(), send(Socket, "~p", [inputs_restarted]),{noreply, State};
+    "restart" -> ok = alarmsys_sup:restart_inputs(), send(Socket, "~p", [inputs_restarted]), {noreply, State};
     Otherwise -> case convert_to_code(Otherwise) of
-                   {ok, Code}-> send(Socket, "~p", [alarm_core:handle_code(Code)]), {noreply, State};
-                   {error, _}-> send(Socket, "wrong code", []), {noreply, State}
+                   {ok, Code} -> send(Socket, "~p", [alarm_core:handle_code(Code)]), {noreply, State};
+                   {error, _} -> send(Socket, "wrong code", []), {noreply, State}
                  end
   end;
 
 handle_info({tcp_closed, Socket}, State) ->
-alarm_soc_handler:remove_socket(Socket),
-io:format("tcp_closed: ~p\n", [Socket]), {stop, normal, State};
+  alarm_soc_handler:remove_socket(Socket),
+  io:format("tcp_closed: ~p\n", [Socket]), {stop, normal, State};
 
 handle_info({tcp_error, Socket, _}, State) ->
-io:format("tcp_error: ~p\n", [Socket]),{stop, normal, State};
+  io:format("tcp_error: ~p\n", [Socket]), {stop, normal, State};
 
 
 handle_info(E, State) ->

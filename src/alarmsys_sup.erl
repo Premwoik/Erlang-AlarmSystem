@@ -27,9 +27,9 @@ start_link() ->
   ok = gen_event:add_handler(?NOTI_EVENT, alarm_screen_writer, []),
   {ok, Pid}.
 
-restart_inputs()->
+restart_inputs() ->
   ok = supervisor:terminate_child(?SERVER, alarm_inputs),
-  {ok,_} = supervisor:restart_child(?SERVER, alarm_inputs),
+  {ok, _} = supervisor:restart_child(?SERVER, alarm_inputs),
   ok.
 
 %%====================================================================
@@ -57,7 +57,7 @@ init(Memory) ->
     shutdown => brutal_kill,
     type => supervisor,
     modules => [alarm_soc_sup]},
-  Event =  {my_event, {gen_event, start_link, [{local, ?NOTI_EVENT}]},
+  Event = {my_event, {gen_event, start_link, [{local, ?NOTI_EVENT}]},
     permanent, 5000, worker, [alarm_soc_handler, alarm_core, alarm_history_handler]},
 
   ChildSpecs = [Inputs, Core, Event, SocketsSup],
@@ -66,8 +66,6 @@ init(Memory) ->
 %%====================================================================
 %% Internal functions
 %%====================================================================
-
-get_inputs({mem, Zones, _, _}) -> lists:usort(lists:flatten([Inputs || {zone, _, Inputs} <- Zones])).
 
 
 read_memory() ->

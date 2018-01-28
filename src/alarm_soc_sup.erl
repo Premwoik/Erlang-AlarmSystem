@@ -63,11 +63,11 @@ init([]) ->
 
   SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
 
-  {ok, ListenSocket} = gen_tcp:listen(?PORT, [{active,true}, {reuseaddr, true}]),
+  {ok, ListenSocket} = gen_tcp:listen(?PORT, [{active, true}, {reuseaddr, true}]),
 
   Child = {alarm_soc, {alarm_soc, start_link, [ListenSocket]}, temporary, 1000, worker, [alarm_soc]},
   spawn(fun start_socket/0),
-  {ok, { SupFlags, [Child]}}.
+  {ok, {SupFlags, [Child]}}.
 
 
 start_socket() ->
