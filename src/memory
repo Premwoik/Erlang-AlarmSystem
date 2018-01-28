@@ -1,14 +1,16 @@
 {mem,
     [
-        {zone,z1,[1,2,3,4]},
-        {zone,z2,[5,6]},
-        {zone,z3,[7,8]}],
+        {zone, z1, [1,2,3,4]},
+        {zone, z2, [5,6]},
+        {zone, z3, [7,8]}],
     [],
     [
-        {code,123,idle,activate_zone,[z1,z2]},
-        {code,123,watch,deactivate_zone,[z1,z2]},
-        {code,13,idle,activate_zone,[z3]},
-        {code,13,watch,deactivate_zone,[z3]},
-        {code,321,alarm_on,turn_off,none}
+        {code, 123, idle, activate_zone, [z1,z2]},
+        {code, 123, watch, toggle_zone, [z1,z2]},
+        {code, 13, idle,activate_zone, [z3]},
+        {code, 13, watch,toggle_zone, [z3]},
+        {code, 16, idle,activate_zone, [z1,z3]},
+        {code, 16, watch,toggle_zone, [z1,z3]},
+        {code, 321, alarm_on, turn_off, none}
      ]
 }.

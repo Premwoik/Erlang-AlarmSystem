@@ -8,8 +8,8 @@
 %%%-------------------------------------------------------------------
 -author("prw").
 
--define(MANAGER, events).
+-define(NOTI_EVENT, events).
 -define(PORT, 8091).
 -define(LOGS, "src/logs").
--define(SENSOR_NUM, 20).
--record(noti, {old_state = null, state = null, reason = null, desc = null}).
+-define(SENSORS_NUM, 20).
+-record(noti, {state = null, reason = null, more = null}).

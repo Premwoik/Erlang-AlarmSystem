@@ -47,7 +47,7 @@ start_link(Socket) ->
 
 
 init(Socket) ->
-  process_flag(trap_exit, true),
+%%  process_flag(trap_exit, true),
   gen_server:cast(self(), accept),
   {ok, #state{socket = Socket, type=listener}}.
 
@@ -98,9 +98,6 @@ handle_cast(Msg, State) ->
   {noreply, State}.
 
 
-
-
-
 %%--------------------------------------------------------------------
 %% @private
 %% @doc
@@ -119,29 +116,27 @@ handle_cast(Msg, State) ->
 handle_info({tcp, Socket, "quit"++_}, State) ->
   gen_tcp:close(Socket),
   alarm_soc_handler:remove_socket(Socket),
-  {stop, normal, State};
-
-handle_info({tcp_closed, Socket}, State = #state{type = connected}) ->
-  alarm_soc_handler:remove_socket(Socket),
-  io:format("tcp_closed: ~p\n", [Socket]), {stop, normal, State};
-
-handle_info({tcp_closed, Socket}, State) ->
-  io:format("tcp_closed: ~p\n", [Socket]), {stop, normal, State};
-
-
-handle_info({tcp_error, Socket, _}, State) ->
-  io:format("tcp_error: ~p\n", [Socket]),{stop, normal, State};
+{stop, normal, State};
 
 handle_info({tcp, Socket, Msg}, State) ->
   case Msg of
     "sabotage " ++ Sensor -> alarm_inputs:sabotage_sensor(list_to_integer(Sensor)), {noreply, State};
-    "activate " ++ Sensor -> alarm_inputs:active_sensor(list_to_integer(Sensor)), {noreply, State};
+    "activate " ++ Sensor -> alarm_inputs:activate_sensor(list_to_integer(Sensor)), {noreply, State};
     "restart" -> ok = alarmsys_sup:restart_inputs(), send(Socket, "~p", [inputs_restarted]),{noreply, State};
     Otherwise -> case convert_to_code(Otherwise) of
                    {ok, Code}-> send(Socket, "~p", [alarm_core:handle_code(Code)]), {noreply, State};
                    {error, _}-> send(Socket, "wrong code", []), {noreply, State}
                  end
   end;
+
+handle_info({tcp_closed, Socket}, State) ->
+alarm_soc_handler:remove_socket(Socket),
+io:format("tcp_closed: ~p\n", [Socket]), {stop, normal, State};
+
+handle_info({tcp_error, Socket, _}, State) ->
+io:format("tcp_error: ~p\n", [Socket]),{stop, normal, State};
+
+
 handle_info(E, State) ->
   io:fwrite("unexpected: ~p~n", [E]),
   {noreply, State}.
@@ -160,11 +155,8 @@ handle_info(E, State) ->
 -spec(terminate(Reason :: (normal | shutdown | {shutdown, term()} | term()),
     State :: #state{}) -> term()).
 
-terminate(_Reason, #state{socket = Socket, type = connected}) ->
-  alarm_soc_handler:remove_socket(Socket),
-  ok = gen_tcp:close(Socket);
-
 terminate(_Reason, #state{socket = Socket}) ->
+  alarm_soc_handler:remove_socket(Socket),
   ok = gen_tcp:close(Socket).
 
 %%%===================================================================

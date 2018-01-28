@@ -22,9 +22,9 @@
 
 start_link() ->
   {ok, Pid} = supervisor:start_link({local, ?SERVER}, ?MODULE, read_memory()),
-  ok = gen_event:add_handler(?MANAGER, alarm_soc_handler, []),
-  ok = gen_event:add_handler(?MANAGER, alarm_history, [?LOGS]),
-  ok = gen_event:add_handler(?MANAGER, alarm_screen_writer, []),
+  ok = gen_event:add_handler(?NOTI_EVENT, alarm_soc_handler, []),
+  ok = gen_event:add_handler(?NOTI_EVENT, alarm_history, [?LOGS]),
+  ok = gen_event:add_handler(?NOTI_EVENT, alarm_screen_writer, []),
   {ok, Pid}.
 
 restart_inputs()->
@@ -45,7 +45,7 @@ init(Memory) ->
     type => worker,
     modules => [alarm_core, alarm_file]},
   Inputs = #{id => alarm_inputs,
-    start => {alarm_inputs, start_link, [?SENSOR_NUM]},
+    start => {alarm_inputs, start_link, [?SENSORS_NUM]},
     restart => permanent,
     shutdown => brutal_kill,
     type => worker,
@@ -57,7 +57,7 @@ init(Memory) ->
     shutdown => brutal_kill,
     type => supervisor,
     modules => [alarm_soc_sup]},
-  Event =  {my_event, {gen_event, start_link, [{local, ?MANAGER}]},
+  Event =  {my_event, {gen_event, start_link, [{local, ?NOTI_EVENT}]},
     permanent, 5000, worker, [alarm_soc_handler, alarm_core, alarm_history_handler]},
 
   ChildSpecs = [Inputs, Core, Event, SocketsSup],

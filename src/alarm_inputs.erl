@@ -16,7 +16,7 @@
 -export([init/1, handle_call/3, handle_cast/2, stop/0, start_link/1]).
 
 %%motion
--export([motion_sensor/0, get_sensors/0, get_module/0, spawn_sensors/2, sabotage_sensor/1, active_sensor/1]).
+-export([motion_sensor/0, get_sensors/0, get_module/0, spawn_sensors/2, sabotage_sensor/1, activate_sensor/1]).
 
 
 sabotage_sensor(Number) ->
@@ -25,7 +25,7 @@ sabotage_sensor(Number) ->
   exit(Pid, error).
 
 
-active_sensor(Number) ->
+activate_sensor(Number) ->
   Data = get_sensors(),
   Pid = get_sensor_by_number(Number, Data),
   erlang:send(Pid, move),
@@ -66,7 +66,7 @@ handle_cast({sabotage, Pid}, State) ->
 
 handle_cast({move_detected, Pid}, State) ->
   Number = get_sensor_number(Pid, State, 1),
-  alarm_core:active_input(Number),
+  alarm_core:activate_input(Number),
   {noreply, State}.
 
 
