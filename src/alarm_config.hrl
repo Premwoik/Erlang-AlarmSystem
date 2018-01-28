@@ -11,5 +11,6 @@
 -define(NOTI_EVENT, events).
 -define(PORT, 8091).
 -define(LOGS, "src/logs").
+-define(MEMORY_FILE, "src/memory").
 -define(SENSORS_NUM, 20).
 -record(noti, {state = null, reason = null, more = null}).

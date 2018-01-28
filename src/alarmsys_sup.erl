@@ -75,6 +75,5 @@ read_memory() ->
   Value.
 
 read_file_to_string() ->
-  {ok, Path} = file:get_cwd(),
-  {ok, File} = file:read_file(Path ++ "/src/memory"),
+  {ok, File} = file:read_file(?MEMORY_FILE),
   unicode:characters_to_list(File).
