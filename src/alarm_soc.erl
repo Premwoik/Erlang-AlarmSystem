@@ -119,14 +119,30 @@ handle_info({tcp, Socket, "quit" ++ _}, State) ->
   {stop, normal, State};
 
 handle_info({tcp, Socket, Msg}, State) ->
-  case Msg of
-    "sabotage " ++ Sensor -> alarm_inputs:sabotage_sensor(list_to_integer(Sensor)), {noreply, State};
-    "activate " ++ Sensor -> alarm_inputs:activate_sensor(list_to_integer(Sensor)), {noreply, State};
-    "restart" -> ok = alarmsys_sup:restart_inputs(), send(Socket, "~p", [inputs_restarted]), {noreply, State};
-    Otherwise -> case convert_to_code(Otherwise) of
-                   {ok, Code} -> send(Socket, "~p", [alarm_core:handle_code(Code)]), {noreply, State};
-                   {error, _} -> send(Socket, "wrong code", []), {noreply, State}
-                 end
+  try
+    case Msg of
+
+      "sabotage " ++ Sensor->
+        io:format("~p", [Sensor]),
+        io:write(is_integer(Sensor)),
+        Result = alarm_inputs:sabotage_sensor(list_to_integer(Sensor)),
+        send(Socket, "~p", [Result]),
+        {noreply, State};
+
+      "activate " ++ Sensor->
+        Result = alarm_inputs:activate_sensor(list_to_integer(Sensor)),
+        send(Socket, "~p", [Result]),
+        {noreply, State};
+
+      "restart" ->
+        ok = alarmsys_sup:restart_inputs(),
+        send(Socket, "~p", [inputs_restarted]),
+        {noreply, State};
+
+      Code -> {CodeInt, _} = string:to_integer(Code),io:format("CODE ~p", [CodeInt]),  send(Socket, "~p", [alarm_core:handle_code(CodeInt)]), {noreply, State}
+    end
+  catch
+      _:_  -> send(Socket, "wrong code", []), {noreply, State}
   end;
 
 handle_info({tcp_closed, Socket}, State) ->
@@ -162,13 +178,6 @@ terminate(_Reason, #state{socket = Socket}) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-
-convert_to_code(X) ->
-  try list_to_integer(X) of
-    R -> {ok, R}
-  catch
-    _:_ -> {error, not_integer}
-  end.
 
 send(Socket, Str, Args) ->
   gen_tcp:send(Socket, io_lib:format(Str, Args)).

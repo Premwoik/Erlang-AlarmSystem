@@ -20,16 +20,17 @@
 
 
 sabotage_sensor(Number) ->
-  Data = get_sensors(),
-  Pid = get_sensor_by_number(Number, Data),
-  exit(Pid, error).
+  case get_sensor_pid(Number) of
+    {ok, Pid} -> exit(Pid, error), ok;
+    _ -> wrong_number
+  end.
 
 
 activate_sensor(Number) ->
-  Data = get_sensors(),
-  Pid = get_sensor_by_number(Number, Data),
-  erlang:send(Pid, move),
-  ok.
+  case get_sensor_pid(Number) of
+    {ok, Pid} -> erlang:send(Pid, move), ok;
+    _ -> wrong_number
+  end.
 
 
 get_sensors() -> gen_server:call(?MODULE, {get_sensors}).
@@ -73,6 +74,14 @@ handle_cast({move_detected, Pid}, State) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
+get_sensor_pid(Number) ->
+  Data = get_sensors(),
+  try get_sensor_by_number(Number, Data) of
+    Pid -> {ok, Pid}
+  catch
+    _:_ -> {error}
+  end.
 
 get_sensor_number(Pid, [H | T], Num) when Pid =:= H -> Num;
 get_sensor_number(Pid, [_ | T], Num) -> get_sensor_number(Pid, T, Num + 1).
