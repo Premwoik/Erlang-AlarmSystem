@@ -79,9 +79,7 @@ Obsługa bez użycia manipulatora - komendy do użycia w shellu:
  - alarm_inputs:activate_sensor(numer_sensora) - pobudzenie czujki,
  - alarmsys_sup:restart_inputs() - naprawa wejść.
 
-Przykładowo zdefiniowana pamięć:
- - dostępne kody: 
-    
+Przykładowo zdefiniowana pamięć - dostępne kody:   
     
     '123' - załączanie/wyłączanie stref z1 i z2
     '13' - załączanie/wylączanie strefy z3
