@@ -84,7 +84,7 @@ watch(Type, {handle_code, Code}, Data) ->
 watch(cast, {active_input, Number}, Data) ->
   case input_from_active_zone(Number, Data) of
     true ->
-      notify(#noti{state = alarm_on, reason = {input_activation, Number}, more = }),
+      notify(#noti{state = alarm_on, reason = {input_activation, Number}}),
       {next_state, alarm_on, Data};
     false -> repeat_state_and_data
   end;
